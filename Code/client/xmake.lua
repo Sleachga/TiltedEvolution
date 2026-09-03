@@ -72,6 +72,14 @@ target(name)
         "kernel32")
 end
 
-add_requires("tiltedcore v0.2.7", {debug = true})
+-- LOCAL FORK CHANGE (diverges from upstream v1.8.0): v0.2.7 -> v0.2.9.
+-- This is a SECOND, separate require of tiltedcore (debug variant, built as its own
+-- package instance), so bumping the pin in the root xmake.lua alone is not enough --
+-- this line is the one that actually failed to link:
+--   TiltedCore.lib(MimallocAllocator.cpp.obj) : error LNK2019:
+--     unresolved external symbol mi_malloc_size
+-- See the longer explanation on the tiltedcore entry in the root xmake.lua.
+-- Keep this version in sync with the root xmake.lua.
+add_requires("tiltedcore v0.2.9", {debug = true})
 
 build_client("SkyrimTogetherClient")
