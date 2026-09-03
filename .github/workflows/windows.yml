@@ -25,7 +25,21 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest]
+        # LOCAL FORK CHANGE (diverges from upstream v1.8.0): pinned to windows-2022.
+        # `windows-latest` now resolves to the windows-2025-vs2026 runner image, whose
+        # only Visual Studio is VS 2026. The xmake version pinned below (2.9.8) cannot
+        # detect VS 2026 -- vswhere.exe is found, but xmake logs
+        #   "checking for Microsoft Visual Studio (x64) version ... no"
+        # and the first dependency that installs through CMake (sol2 v3.3.0) then dies:
+        #   error: modules/package/tools/cmake.lua:110: vs not found!
+        # windows-2022 ships VS 2022, which xmake 2.9.8 understands.
+        # Upstream hit the same wall and pinned windows-2022 on `dev` too (they also
+        # moved to xmake 3.1.0, which we are not doing here to keep the v1.8.0
+        # toolchain/dependency graph byte-identical to the shipped release).
+        # REVERT WHEN: we bump `xmake-version` below to >= 3.0.x, or rebase onto an
+        # upstream branch that already has. Then this can go back to `windows-latest`.
+        # windows-2022 is on GitHub's deprecation path, so this is a stopgap.
+        os: [windows-2022]
         arch: [x64]
 
     runs-on: ${{ matrix.os }}
