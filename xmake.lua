@@ -34,7 +34,20 @@ end
 add_requires(
     "entt v3.10.0", 
     "recastnavigation v1.6.0", 
-    "tiltedcore v0.2.7", 
+    -- LOCAL FORK CHANGE (diverges from upstream v1.8.0): v0.2.7 -> v0.2.9.
+    -- tiltedcore is built by a *nested* xmake invocation inside its own source tree,
+    -- so the `add_requireconfs("*.mimalloc", ...)` pin below does NOT reach it.
+    -- TiltedCore v0.2.7's own xmake.lua says `add_requires("mimalloc")` with no
+    -- version, so it now resolves to whatever xmake-repo ships as latest (v3.5.0),
+    -- where mi_malloc_size is no longer exported from the static lib:
+    --   TiltedCore.lib(MimallocAllocator.cpp.obj) : error LNK2019:
+    --     unresolved external symbol mi_malloc_size
+    -- v0.2.9 is exactly two commits later: it pins mimalloc 2.2.4 / hopscotch-map
+    -- 2.4.0 / catch2 2.13.9, plus a GetPath() bugfix. No public header changed
+    -- between v0.2.7 and v0.2.9, so this is source-compatible for us.
+    -- Upstream made the same bump on `dev`.
+    -- REVERT WHEN: never, really -- this is strictly a version pin catching up.
+    "tiltedcore v0.2.9",
     "cryptopp 8.9.0", 
     "spdlog v1.13.0", 
     "cpp-httplib 0.14.0",
