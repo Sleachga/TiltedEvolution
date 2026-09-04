@@ -65,6 +65,27 @@ if is_plat("windows") then
 end
 
 -- dependencies' dependencies version pinning
+-- LOCAL FORK CHANGE (diverges from upstream v1.8.0): force ONE tiltedcore version.
+--
+-- Libraries/TiltedConnect/xmake.lua and Libraries/TiltedHooks/xmake.lua are git
+-- SUBMODULES pointing at TiltedPhoques repos we do not control, and both still say
+--   add_requires("tiltedcore v0.2.7", ...)
+-- Because they are includes()-ed into this same xmake project, the build resolves two
+-- package instances: tiltedcore v0.2.7 and tiltedcore#1 v0.2.9. Bumping the pins in
+-- this file and in Code/client/xmake.lua is therefore NOT enough -- v0.2.7 still gets
+-- built, and its nested xmake build requires "mimalloc" with no version, which now
+-- resolves to mimalloc v3.5.0, where mi_malloc_size is gone:
+--   MimallocAllocator.cpp:(.text+0x29): undefined reference to `mi_malloc_size'
+-- On Windows this happened to survive (v0.2.9 was installed first, so the unpinned
+-- nested require reused the already-present mimalloc 2.2.4); on Linux it does not.
+--
+-- This override forces every tiltedcore require in the project -- including the two
+-- submodule ones -- to v0.2.9, which pins mimalloc 2.2.4 itself. It avoids having to
+-- fork the submodules just to edit one version string.
+--
+-- REVERT WHEN: the TiltedConnect/TiltedHooks submodules are updated to commits that
+-- require tiltedcore >= v0.2.9 themselves. Then this line can go.
+add_requireconfs("tiltedcore", { version = "v0.2.9", override = true })
 add_requireconfs("*.mimalloc", { version = "2.2.4", override = true })
 add_requireconfs("*.cmake", { version = "3.30.2", override = true })
 add_requireconfs("*.openssl", { version = "1.1.1-w", override = true })
