@@ -65,25 +65,59 @@ private:
     RenderSystemD3D11* m_pRenderSystem;
 };
 
+// SANDMAN FORK: changed. See NOTICE-SANDMAN.md.
+//
+// Was: outdoors this returned the WORLDSPACE name and never looked at the cell.
+// For Tamriel the worldspace is literally the string "Skyrim", so the party
+// menu's Location column read "Skyrim" for every outdoor player, always -- and
+// outdoors is precisely when you have lost each other. Indoors it worked fine,
+// which is why the column looked implemented rather than broken.
+//
+// Now: the CELL's own name is preferred whether you are indoors or out, and the
+// worldspace is only a fallback. Named exterior cells (city exteriors and other
+// hand-named places) therefore report properly instead of being flattened to
+// "Skyrim".
+//
+// LIMIT, and it is the honest one: Skyrim's wilderness cells are genuinely
+// unnamed, so out in the open this still falls back to the worldspace. Getting a
+// real region name there ("Whiterun Hold") needs BGSLocation, which this
+// codebase does not wrap at all -- adding it means new form ABI and offsets,
+// which is a different size of job and is easy to get silently wrong. The
+// intended answer for wilderness is the coordinate -> landmark table
+// ("near Valtheim Towers") described in docs/PARTY-LOCATION.md, which needs no
+// engine ABI at all. This change is the cheap, safe half.
 String GetCellName(const GameId& aWorldSpaceId, const GameId& aCellId) noexcept
 {
     auto& modSystem = World::Get().GetModSystem();
 
     String cellName = "UNKNOWN";
 
-    if (aWorldSpaceId)
-    {
-        const uint32_t worldSpaceId = modSystem.GetGameId(aWorldSpaceId);
-        TESWorldSpace* pWorldSpace = Cast<TESWorldSpace>(TESForm::GetById(worldSpaceId));
-        if (pWorldSpace)
-            cellName = pWorldSpace->GetName();
-    }
-    else
+    if (aCellId)
     {
         const uint32_t cellId = modSystem.GetGameId(aCellId);
         TESObjectCELL* pCell = Cast<TESObjectCELL>(TESForm::GetById(cellId));
         if (pCell)
-            cellName = pCell->GetName();
+        {
+            // GetName() returns const char* and may be null or empty -- an
+            // unnamed exterior cell is the common case, not an error. The old
+            // code assigned it straight into a String, which would have been a
+            // null dereference the moment it hit one.
+            const char* pName = pCell->GetName();
+            if (pName && pName[0] != '\0')
+                cellName = pName;
+        }
+    }
+
+    if (cellName == "UNKNOWN" && aWorldSpaceId)
+    {
+        const uint32_t worldSpaceId = modSystem.GetGameId(aWorldSpaceId);
+        TESWorldSpace* pWorldSpace = Cast<TESWorldSpace>(TESForm::GetById(worldSpaceId));
+        if (pWorldSpace)
+        {
+            const char* pName = pWorldSpace->GetName();
+            if (pName && pName[0] != '\0')
+                cellName = pName;
+        }
     }
 
     return cellName;
