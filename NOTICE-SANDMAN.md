@@ -131,7 +131,10 @@ Keep this in sync with `git diff --stat v1.8.0..sandman`; if they disagree, git 
 | File | First changed | Why |
 |---|---|---|
 | `.github/workflows/windows.yml` | 2026-09-03 | `windows-latest` now resolves to a VS 2026 image; xmake 2.9.8 cannot detect VS 2026, so the CI matrix is pinned to `windows-2022`. |
-| `xmake.lua`, `Code/client/xmake.lua` | 2026-09-03 | CI build fixes on the same toolchain pin. |
+| `xmake.lua` | 2026-09-03 | Toolchain pins. Now also forces every `tiltedcore` require to v0.2.9 — the `Libraries/TiltedConnect` and `Libraries/TiltedHooks` submodules still ask for v0.2.7, whose unpinned nested `mimalloc` require resolves to v3.5.0, where `mi_malloc_size` is gone. |
+| `Code/client/xmake.lua` | 2026-09-03 | The client keeps its own debug `tiltedcore` pin; bumped to v0.2.9 to match the root. |
+| `Dockerfile` | 2026-09-03 | Pin xmake to 2.9.8; the unpinned installer now pulls 3.x onto a tree declaring `set_xmakever("2.8.5")`. |
+| `Code/client/Services/Generic/OverlayService.cpp` | 2026-09-03 | `GetCellName` returned the worldspace outdoors, so the party menu's Location column read "Skyrim" for every outdoor player. |
 
 ---
 

@@ -1,3 +1,8 @@
+# MODIFIED IN THE `sandman` FORK — not upstream Tilted Online.
+#   2026-09-03  Pin xmake to 2.9.8; the unpinned installer now pulls 3.x onto a tree declaring set_xmakever("2.8.5").
+#   Fork: https://github.com/Sleachga/TiltedEvolution (branch: sandman)
+#   Upstream: https://github.com/tiltedphoques/TiltedEvolution
+
 # Building the server:
 #   x64:   $ docker build -t imagename .
 #   arm64: $ docker build --platform linux/arm64 -t imagename .

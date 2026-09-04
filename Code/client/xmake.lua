@@ -1,3 +1,8 @@
+-- MODIFIED IN THE `sandman` FORK — not upstream Tilted Online.
+--   2026-09-04  Bump the client's separate debug tiltedcore pin to v0.2.9 so it matches the root pin.
+--   Fork: https://github.com/Sleachga/TiltedEvolution (branch: sandman)
+--   Upstream: https://github.com/tiltedphoques/TiltedEvolution
+
 
 local function build_client(name)
 target(name)

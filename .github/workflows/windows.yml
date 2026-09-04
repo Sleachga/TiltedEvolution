@@ -1,3 +1,8 @@
+# MODIFIED IN THE `sandman` FORK — not upstream Tilted Online.
+#   2026-09-03  `windows-latest` now resolves to a VS 2026 image and xmake 2.9.8 cannot detect VS 2026, so the build matrix is pinned to `windows-2022`.
+#   Fork: https://github.com/Sleachga/TiltedEvolution (branch: sandman)
+#   Upstream: https://github.com/tiltedphoques/TiltedEvolution
+
 name: Build windows
 
 on:

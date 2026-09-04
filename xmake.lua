@@ -1,3 +1,8 @@
+-- MODIFIED IN THE `sandman` FORK — not upstream Tilted Online.
+--   2026-09-04  Force every tiltedcore require to v0.2.9; v0.2.7's unpinned nested mimalloc require now resolves to v3.5.0, where mi_malloc_size no longer exists.
+--   Fork: https://github.com/Sleachga/TiltedEvolution (branch: sandman)
+--   Upstream: https://github.com/tiltedphoques/TiltedEvolution
+
 set_xmakever("2.8.5")
 
 -- If newer version of xmake, remove ccache until it actually works

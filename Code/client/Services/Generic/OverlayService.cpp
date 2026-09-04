@@ -1,3 +1,8 @@
+// MODIFIED IN THE `sandman` FORK — not upstream Tilted Online.
+//   2026-09-03  Prefer the cell's own name over the worldspace in GetCellName, so the party menu stops reporting "Skyrim" for every outdoor player.
+//   Fork: https://github.com/Sleachga/TiltedEvolution (branch: sandman)
+//   Upstream: https://github.com/tiltedphoques/TiltedEvolution
+
 #include <TiltedOnlinePCH.h>
 
 #include <Services/OverlayService.h>
