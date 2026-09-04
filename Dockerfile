@@ -12,10 +12,15 @@ ENV XMAKE_ROOT=y
 SHELL ["/bin/bash", "-c"]
 
 # Get packages and xmake
+#
+# xmake is PINNED. The upstream line had no version, which now pulls xmake 3.x
+# onto a tree declaring set_xmakever("2.8.5") -- the toolchain changes under you
+# with no diff. 2.9.8 is what .github/workflows/windows.yml builds green with, so
+# the container and CI agree. Unpin only once the tree supports 3.x.
 
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential curl pkg-config git ca-certificates unzip libssl-dev && \
     rm -rf /var/lib/apt/lists/* && \
-    curl -fsSL https://xmake.io/shget.text | bash
+    curl -fsSL https://xmake.io/shget.text | bash -s v2.9.8
 
 # Copy source and build
 
