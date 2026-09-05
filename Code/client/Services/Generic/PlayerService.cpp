@@ -89,7 +89,29 @@ void PlayerService::OnDisconnected(const DisconnectedEvent& acEvent) noexcept
 
 void PlayerService::OnServerSettingsReceived(const ServerSettings& acSettings) noexcept
 {
-    m_previousDifficulty = *Settings::GetDifficulty();
+    // SANDMAN FORK: changed. See NOTICE-SANDMAN.md.
+    //
+    // Was: unconditional. But this handler runs for EVERY settings change, not
+    // just the one at connect -- TransportService::HandleNotifySettingsChange
+    // re-triggers it whenever an admin runs SetDifficulty on the live server.
+    // By that point RunDifficultyUpdates() has been forcing the setting to the
+    // server's value on every frame, so *Settings::GetDifficulty() no longer
+    // returns what the player plays at on their own; it returns the server's.
+    // Re-capturing it therefore overwrote "what this player had" with "what the
+    // server had", and OnDisconnected then restored them to the server's
+    // difficulty and left their singleplayer game on it permanently.
+    //
+    // Only capture on the FIRST settings message of a session. 6 is the
+    // sentinel both fields are initialised to and reset to on disconnect; it is
+    // outside the engine's valid 0-5 range and means "no server has set this
+    // yet", so it is a safe test for "this is the connect-time message".
+    //
+    // This matters more in this fork than upstream because the companion site
+    // exposes a difficulty selector, so live changes are routine rather than
+    // rare.
+    if (m_serverDifficulty == 6)
+        m_previousDifficulty = *Settings::GetDifficulty();
+
     PlayerCharacter::Get()->SetDifficulty(acSettings.Difficulty);
     m_serverDifficulty = acSettings.Difficulty;
 

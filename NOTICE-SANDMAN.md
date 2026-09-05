@@ -136,6 +136,7 @@ Keep this in sync with `git diff --stat v1.8.0..sandman`; if they disagree, git 
 | `Dockerfile` | 2026-09-03 | Pin xmake to 2.9.8; the unpinned installer now pulls 3.x onto a tree declaring `set_xmakever("2.8.5")`. |
 | `Code/client/Services/Generic/OverlayService.cpp` | 2026-09-03 | `GetCellName` returned the worldspace outdoors, so the party menu's Location column read "Skyrim" for every outdoor player. |
 | `Code/client/Games/Skyrim/BSGraphics/BSGraphicsRenderer.cpp` | 2026-09-04 | Skyrim holds a `ClipCursor` rectangle over its own window and never releases it, so the mouse could not reach a second monitor after alt-tabbing. The per-frame render hook now clears the clip while the game is not the foreground window. |
+| `Code/client/Services/Generic/PlayerService.cpp` | 2026-09-05 | `OnServerSettingsReceived` re-captured the player's own difficulty on every live settings change, by which point it had already been forced to the server's value — so disconnecting left them stuck on the server's difficulty. Now captured only on the first settings message of a session. |
 
 ---
 
