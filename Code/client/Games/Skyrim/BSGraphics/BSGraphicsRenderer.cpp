@@ -65,11 +65,50 @@ void Hook_Renderer_Init(Renderer* self, BSGraphics::RendererInitOSData* aOSData,
 
 void (*StopTimer)(int) = nullptr;
 
+// SANDMAN FORK: added. See NOTICE-SANDMAN.md.
+//
+// Skyrim confines the mouse pointer to its own window with ClipCursor and never
+// lets go, so once the game is running the cursor cannot reach a second monitor
+// even after you alt-tab away. That is the whole "the game is hogging my mouse"
+// complaint, and it is the engine doing it, not Skyrim Together: ClipCursor
+// appears nowhere else in this codebase.
+//
+// Note what is ALREADY handled and is therefore NOT the cause:
+//   - Input polling is skipped while we are not foreground
+//     (BSInput/BSInputDeviceManager.cpp), so the game is not reading the mouse.
+//   - DirectInput exclusive mode is patched out below (DISCL_NONEXCLUSIVE), so
+//     it is not a device grab either.
+// The game is not consuming the pointer. It is merely still holding the clip
+// rectangle it set while it had focus.
+//
+// So: release the clip on every frame we are not the foreground window. This is
+// deliberately level-triggered rather than fired once on the focus-loss edge,
+// because the engine re-applies its clip from its own render path and a
+// one-shot release would just be overwritten on the next frame. ClipCursor with
+// a null rectangle is a trivial user32 call and this only runs while you are
+// tabbed out, when frame cost is irrelevant anyway.
+//
+// Nothing is done on the way back in, on purpose. The game re-establishes its
+// own clip when it regains focus, which is what you want while actually
+// playing. This only ever gives the pointer back; it never takes it.
+static void ReleaseCursorWhileBackgrounded()
+{
+    auto* pWindow = GetMainWindow();
+    // Null until Hook_Renderer_Init runs; there is no window to be clipped to yet.
+    if (!pWindow)
+        return;
+
+    if (!pWindow->IsForeground())
+        ClipCursor(nullptr);
+}
+
 // Insert us at the End
 void Hook_StopTimer(int type)
 {
     if (g_sRs)
         g_sRs->OnRender();
+
+    ReleaseCursorWhileBackgrounded();
 
     StopTimer(type);
 }
